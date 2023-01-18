@@ -9,9 +9,9 @@ typedef struct stack{
 	int top;	
 }st;
 
-st createEmptyStack(){
-	st stack;
-	stack.top = -1;
+st* createEmptyStack(){
+	st* stack =  (st*)malloc(sizeof(st));
+	stack->top = -1;
 	return stack;
 }
 
@@ -47,8 +47,9 @@ void printStack(st* s){
     int i=0, tempTop = s -> top;
     
     for(i=tempTop; i>=0; i--){
-        printf("%d\n", (s->arr)[i]);
+        printf("%c, ", (s->arr)[i]);
     }
+    printf("\n");
 }
 
 char stackTop(st* stack){
@@ -86,8 +87,7 @@ int precedence(char op){
 }
 
 int isOperator(char o){
-	if(o == '+' || o == '-' || o == '*' || o == '/' 
-		|| o == '^' || o == ')' || o == '(')
+	if(o == '+' || o == '-' || o == '*' || o == '/' || o == '^' || o == ')' || o == '(')
 	{
 		return 1;
 	}
@@ -97,69 +97,75 @@ int isOperator(char o){
 }
 
 void infixToPrefix(char* exp){
-	st stack1 = createEmptyStack();
+	st *stack1 = createEmptyStack();
 	int i=0, len = strlen(exp);
 	
 	for(i=0; i<len; i++){
+//        printStack(stack1);
 		if(isOperator(exp[i])){
-			if(isEmpty(&stack1)){
-				push(&stack1, exp[i]);
+			if(isEmpty(stack1)){
+				push(stack1, exp[i]);
 			}
 			else{
 				if(exp[i] == '('){
-					push(&stack1, exp[i]);
+					push(stack1, exp[i]);
 				}
 				else if(exp[i] == ')'){
-					while(stackTop(&stack1) != '('){
-						printf("%c", stackTop(&stack1));
-						pop(&stack1);
+					while(stackTop(stack1) != '('){
+						printf("%c", stackTop(stack1));
+						pop(stack1);
 					}
-					pop(&stack1);
+					pop(stack1);
 				}
 				else{
 					int curr_preced = precedence(exp[i]);
-					int top_preced = precedence(stackTop(&stack1));
+					int top_preced = precedence(stackTop(stack1));
 					if(curr_preced>top_preced){
-						push(&stack1, exp[i]);
+						push(stack1, exp[i]);
 					}
 					else if(curr_preced<top_preced){
-						while(curr_preced<top_preced && !isEmpty(&stack1)){
-							printf("%c", stackTop(&stack1));
-							pop(&stack1);
-							top_preced = precedence(stackTop(&stack1));
+						while(!isEmpty(stack1)  && curr_preced<top_preced){
+							printf("%c", stackTop(stack1));
+							pop(stack1);
+                            if(isEmpty(stack1)){
+                                break;
+                            }
+                            else{
+                                top_preced = precedence(stackTop(stack1));
+                            }
+							
 						}
-						if(isEmpty(&stack1) || curr_preced>top_preced){
-							push(&stack1, exp[i]);
+						if(isEmpty(stack1) || curr_preced>top_preced){
+							push(stack1, exp[i]);
 						}
 						else{
-							printf("%c", stackTop(&stack1));
-							pop(&stack1);
-							push(&stack1, exp[i]);
+							printf("%c", stackTop(stack1));
+							pop(stack1);
+							push(stack1, exp[i]);
 						}
 					}
 					else{
-						printf("%c", stackTop(&stack1));
-						pop(&stack1);
-						push(&stack1, exp[i]);
+						printf("%c", stackTop(stack1));
+						pop(stack1);
+						push(stack1, exp[i]);
 					}
 				}
-				
 			}
 		}
 		else{
 			printf("%c", exp[i]);
 		}
 	}
-	if(!isEmpty(&stack1)){
-		while(!isEmpty(&stack1)){
-			printf("%c", stackTop(&stack1));
-			pop(&stack1);
+	if(!isEmpty(stack1)){
+		while(!isEmpty(stack1)){
+			printf("%c", stackTop(stack1));
+			pop(stack1);
 		}
 	}
 }
 
 int main() {
-	char exp[] = "x^y/(5*z)+2";
+	char exp[] = "a+b*(c^d-e)^(f+g*h)-i";
 	infixToPrefix(exp);
 
 	return 0;
